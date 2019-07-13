@@ -1,0 +1,73 @@
+package com.kmeans;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import jxl.Sheet;
+import jxl.Workbook;
+import jxl.read.biff.BiffException;
+
+public class Main {
+	public static void main(String[] args) {
+
+		Assessment ass = new Assessment();
+
+		Main obj = new Main();
+		// 此处为我创建Excel路径：E:/zhanhj/studysrc/jxl下
+		File file = new File("D:/eclipse-workspace/AR-kmeans/userSet_500.xls");
+		KMeansRun kRun = new KMeansRun(40, obj.readExcel(file));
+		List<Cluster> clusterSet = kRun.run();
+
+		for (Cluster cluster : clusterSet) {
+			System.out.println(cluster);
+		}
+		System.out.println("单次迭代运行次数：" + kRun.getIterTimes());
+		ass.assessment(clusterSet);
+	}
+
+	// 去读Excel的方法readExcel，该方法的入口参数为一个File对象
+	public ArrayList<String[]> readExcel(File file) {
+		ArrayList<String[]> dataSet = new ArrayList<String[]>(200);
+		try {
+			// 创建输入流，读取Excel
+			InputStream is = new FileInputStream(file.getAbsolutePath());
+			// jxl提供的Workbook类
+			Workbook wb = Workbook.getWorkbook(is);
+			// Excel的页签数量
+			int sheet_size = wb.getNumberOfSheets();
+			for (int index = 0; index < 1; index++) {
+				// 每个页签创建一个Sheet对象
+				Sheet sheet = wb.getSheet(index);
+				// sheet.getRows()返回该页的总行数 sheet.getRows()
+				for (int i = 0; i < 500; i++) {
+					String cellinfo = null;
+					String[] b = new String[4];
+					// sheet.getColumns()返回该页的总列数
+					for (int j = 0; j < sheet.getColumns(); j++) {
+						cellinfo = sheet.getCell(j, i).getContents();
+						try {
+							String a = cellinfo;
+							b[j] = a;
+						} catch (NumberFormatException e) {
+							e.printStackTrace();
+						}
+					}
+					dataSet.add(b);
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (BiffException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return dataSet;
+	}
+}
